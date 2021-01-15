@@ -1,12 +1,12 @@
 package ru.netology;
 
-import Server.Server;
-
-import java.io.IOException;
+import server.Server;
 
 public class Main {
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) {
     (new Server()).serverStart();
+
+
   }
 }
 
