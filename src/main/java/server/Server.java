@@ -1,17 +1,27 @@
 package server;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
 import java.io.*;
 import java.net.ServerSocket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
 
+    private static final String URL = null;
     final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
+    public static final String GET = "GET";
+    public static final String POST = "POST";
 
     public Server() {
     }
@@ -25,7 +35,9 @@ public class Server {
                     executeIt.submit(() -> {
                         try {
                             event(serverSocket);
-                        } catch (IOException e) {
+                            getQueryParam(URL);
+                            getQueryParams(URL);
+                        } catch (IOException | URISyntaxException e) {
                             e.printStackTrace();
                         }
                     });
@@ -101,4 +113,21 @@ public class Server {
             e.printStackTrace();
         }
     }
+
+    public String getQueryParam(String name) {
+        String query;
+        String[] urlParts = name.split("\\?");
+        query = urlParts[1];
+        System.out.println("Path -> " + urlParts[0]);
+        return query;
+    }
+    public Map<String, String> getQueryParams(String name) throws URISyntaxException {
+        Map<String, String> params = new HashMap<>();
+        List<NameValuePair> data = URLEncodedUtils.parse(new URI(name), String.valueOf(StandardCharsets.UTF_8));
+        for (NameValuePair nvp : data) {
+            params.put(nvp.getName(), nvp.getValue());
+        }
+        return params;
+    }
 }
+
