@@ -19,6 +19,7 @@ public class Server {
 
     final List<String> validPaths = List.of("/index.html", "/spring.svg", "/spring.png", "/resources.html", "/styles.css", "/app.js", "/links.html", "/forms.html", "/classic.html", "/events.html", "/events.js");
     final Map<String, String> params = new HashMap<>();
+
     public Server() {
     }
 
@@ -54,7 +55,7 @@ public class Server {
             {
                 final var requestLine = in.readLine();
                 final var parts = requestLine.split(" ");
-                getQueryParam(requestLine);
+
                 if (parts.length != 3) {
                     return;
                 }
@@ -70,6 +71,8 @@ public class Server {
                     out.flush();
                     return;
                 }
+
+                setQueryParams(path);
 
                 final var filePath = Path.of(".", "public", path);
                 final var mimeType = Files.probeContentType(filePath);
@@ -103,25 +106,29 @@ public class Server {
                 Files.copy(filePath, out);
                 out.flush();
             }
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
     }
 
-    public String getQueryParam(String requestLine) {
-        String query;
-        String[] urlParts = requestLine.split("\\?");
-        query = urlParts[1];
-        System.out.println("Path -> " + urlParts[0]);
-        return query;
-    }
-
-    public Map<String, String> getQueryParams(String query) throws URISyntaxException {
-        List<NameValuePair> data = URLEncodedUtils.parse(new URI(query), String.valueOf((StandardCharsets.UTF_8)));
+    public Map<String, String> setQueryParams(String path) throws URISyntaxException {
+        List<NameValuePair> data = URLEncodedUtils.parse(new URI(path), String.valueOf(StandardCharsets.UTF_8));
         for (NameValuePair nvp : data) {
             params.put(nvp.getName(), nvp.getValue());
         }
         return params;
+    }
+
+    public String getQueryParam(String name) {
+        return params.get(name);
+    }
+
+    public Map<String, String> getQueryParams() {
+        for(Map.Entry<String, String> entry : params.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            System.out.println(key + "=" + value);
+        }return params;
     }
 }
 
